@@ -88,7 +88,7 @@ export const logout = (req, res) => {
   }
 };
 
-export const updateProfile = async () => {
+export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
     const userId = req.user._id;
@@ -101,7 +101,7 @@ export const updateProfile = async () => {
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { profilePic: uploadResponse },
+      { profilePic: uploadResponse.secure_url },
       { new: true }
     );
     res.status(200).json(updatedUser);
