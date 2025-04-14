@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
-const BASE_URL = "http://localhost:5173";
+const BASE_URL = import.meta.env.MODE==="development"?"http://localhost:5001":"/";
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -33,6 +33,7 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
       toast.success("Account created successfully");
+      get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -79,8 +80,19 @@ export const useAuthStore = create((set, get) => ({
   connectSocket: () => {
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
-    const socket = io(BASE_URL);
+    const socket = io(BASE_URL,{
+      query:{
+        userId:authUser._id,
+      }
+    });
+    set({ socket:socket });
     socket.connect();
+
+    socket.on("getOnlineUsers",(userIds)=>{
+      set({onlineUsers:userIds})
+    })
   },
-  disConnectSocket: () => {},
+  disConnectSocket: () => {
+    if (get().socket?.connected) get().socket.disconnect();
+  },
 }));

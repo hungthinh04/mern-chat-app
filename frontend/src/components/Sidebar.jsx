@@ -9,10 +9,13 @@ const Sidebar = () => {
     useChatStore();
 
   const { onlineUsers } = useAuthStore();
+  const [showOnlineOnly,setShowOnlineOnly] = useState(false)
 
   useEffect(() => {
     getUsers();
   }, [getUsers]);
+
+  const filteredUsers = showOnlineOnly? users.filter(user=>onlineUsers.includes(user._id)):users;
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -24,7 +27,7 @@ const Sidebar = () => {
           <span className="font-medium hidden lg:block">Contacts</span>
         </div>
         {/* TODO: Bộ lọc người dùng online */}
-        {/* <div className="mt-3 hidden lg:flex items-center gap-2">
+        <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
               type="checkbox"
@@ -32,14 +35,14 @@ const Sidebar = () => {
               onChange={(e) => setShowOnlineOnly(e.target.checked)}
               className="checkbox checkbox-sm"
             />
-            <span className="text-sm">Chỉ hiển thị người online</span>
+            <span className="text-sm">show online only</span>
           </label>
-         
-        </div> */}
+         <span>({onlineUsers.length-1} online)</span>
+        </div>
       </div>
 
       <div className="overflow-y-auto w-full py-3">
-        {users.map((user) => (
+        {filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
